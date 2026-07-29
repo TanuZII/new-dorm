@@ -94,6 +94,30 @@ public class UserService {
                 "{}");
     }
 
+    @Transactional
+    public void changeOwnPassword(
+            String username,
+            ChangePasswordRequest request,
+            String ipAddress) {
+        var user = repository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User " + username + " not found"));
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new IllegalArgumentException("Password confirmation does not match");
+        }
+        user.resetPassword(passwordEncoder.encode(request.newPassword()));
+        auditService.record(
+                username,
+                "USER_PASSWORD_CHANGED",
+                "USER",
+                username,
+                null,
+                ipAddress,
+                "{}");
+    }
+
     private AppUserEntity findRequired(long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User " + id + " not found"));

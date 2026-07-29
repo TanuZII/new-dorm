@@ -28,6 +28,9 @@ class AuthControllerTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
+    @Mock
+    private UserService userService;
+
     @Test
     void loginPersistsAuthenticatedSessionAndReturnsUserProfile() {
         var authentication = UsernamePasswordAuthenticationToken.authenticated(
@@ -35,7 +38,7 @@ class AuthControllerTest {
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         var request = new MockHttpServletRequest();
         var response = new MockHttpServletResponse();
-        var controller = new AuthController(authenticationManager);
+        var controller = new AuthController(authenticationManager, userService);
 
         var result = controller.login(new LoginRequest("admin", "password123"), request, response);
 
@@ -50,7 +53,7 @@ class AuthControllerTest {
         when(authenticationManager.authenticate(any()))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
         var mockMvc = MockMvcBuilders
-                .standaloneSetup(new AuthController(authenticationManager))
+                .standaloneSetup(new AuthController(authenticationManager, userService))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,11 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
     private final HttpSessionSecurityContextRepository contextRepository =
             new HttpSessionSecurityContextRepository();
 
-    public AuthController(AuthenticationManager authenticationManager) {
+    public AuthController(AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;
+        this.userService = userService;
     }
 
     @GetMapping("/csrf")
@@ -51,6 +54,16 @@ public class AuthController {
     @GetMapping("/me")
     public LoginResponse me(Authentication authentication) {
         return profile(authentication);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @Valid @RequestBody ChangePasswordRequest password,
+            Authentication authentication,
+            HttpServletRequest request) {
+        userService.changeOwnPassword(
+                authentication.getName(), password, request.getRemoteAddr());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/logout")
