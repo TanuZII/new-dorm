@@ -22,7 +22,7 @@ Final checkout, debt clearance, damage billing, and deposit refund remain in Mil
 
 ## Architecture Decision
 
-Use an incremental normalized migration rather than extending the legacy `rooms.capacity` plus numeric `occupancies.bed_number` model. Flyway V3 introduces explicit buildings, floors, beds, reservations, allocation children, and occupancy events while retaining existing primary keys and migrating legacy room/occupancy rows. The migration must be repeatable only through Flyway history and must not require deleting `dbdorm`.
+Use an incremental normalized migration rather than extending the legacy `rooms.capacity` plus numeric `occupancies.bed_number` model. Flyway V4 introduces explicit buildings, floors, beds, reservations, allocation children, and occupancy events while retaining existing primary keys and migrating legacy room/occupancy rows. The migration must be repeatable only through Flyway history and must not require deleting `dbdorm`.
 
 The backend remains a modular monolith. The `tenant`, `property`, `reservation`, and `occupancy` packages expose REST resources through `/api/v1`; business state changes live in transactional services, and JPA entities are not returned directly. React consumes typed DTOs through the shared cookie/CSRF API client and renders all staff routes inside the existing role-aware shell.
 
@@ -74,7 +74,7 @@ MySQL overlap protection uses three layers:
 
 1. Lock all candidate bed rows in stable ID order.
 2. Query overlapping confirmed reservations and open occupancy allocations inside the same transaction.
-3. Enforce the same invariant with Flyway-owned MySQL `BEFORE INSERT/UPDATE` triggers on `reservation_beds` and `occupancy_beds`. Each trigger checks both active allocation tables for `existing.start_date <= new.end_date AND existing.end_date >= new.start_date` and raises SQLSTATE `45000` on overlap.
+3. Insert one `bed_allocation_days` row per bed and calendar day for the finite reservation or expected occupancy range. Its primary key `(bed_id, allocation_date)` is the final database guard, so concurrent conflicting transactions cannot both commit. Each row references exactly one `reservation_bed` or `occupancy_bed`; cancellation, transfer, and checkout release only the affected future rows while allocation headers and events remain auditable.
 
 Application and MySQL integration tests must prove that two concurrent attempts cannot both reserve the same bed or any bed in an exclusive room reservation.
 

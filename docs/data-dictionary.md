@@ -8,8 +8,13 @@
 | Master Data | `master_data_items` | รหัส/ชื่อ ประเภท parent ช่วงวันที่ใช้งาน สถานะ และ optimistic-lock version |
 | Import | `import_sessions`, `import_errors` | preview token, SHA-256, วันหมดอายุ สรุปจำนวนแถว และข้อผิดพลาดรายแถวก่อน atomic confirm |
 | Tenant | `tenants` | นักศึกษา บุคลากร ศิษย์เก่า และบุคคลภายนอก |
+| Tenant | `tenant_code_sequences`, `tenant_addresses`, `tenant_contacts` | ลำดับรหัสผู้เช่า ที่อยู่ และข้อมูลผู้ติดต่อ/ผู้ติดต่อฉุกเฉิน |
 | Property | `rooms` | อาคาร ห้อง ชั้น ความจุ จำนวนผู้พัก และสถานะ |
+| Property | `buildings`, `floors`, `beds`, `room_meters` | โครงสร้างอาคาร-ชั้น-ห้อง-เตียง และทะเบียนมิเตอร์ประจำห้อง |
+| Reservation | `reservations`, `reservation_beds` | หัวรายการจองและเตียงจริงที่จัดสรรสำหรับการจองรายเตียงหรือทั้งห้อง |
 | Occupancy | `occupancies` | การครอบครองเตียงและช่วงวันที่เข้าพัก |
+| Occupancy | `occupancy_beds`, `occupancy_events` | การจัดสรรเตียงตามช่วงเวลาและประวัติเข้าพัก ย้ายห้อง ขอออก หรือยกเลิกแบบ append-only |
+| Allocation | `bed_allocation_days` | ล็อกหนึ่งแถวต่อเตียงต่อวันด้วย primary key `(bed_id, allocation_date)` และอ้างถึง reservation หรือ occupancy อย่างใดอย่างหนึ่ง |
 | Contract | `contracts` | สัญญา ช่วงเช่า การยืนยัน PDF และ SHA-256 |
 | Billing | `charge_rates` | อัตราที่มีช่วงวันเริ่มและวันสิ้นสุด |
 | Billing | `meter_readings` | มิเตอร์เดิม/ใหม่ อัตราต่อหน่วย และรอบเดือน |

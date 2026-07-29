@@ -4,7 +4,7 @@
 
 **Goal:** Deliver a tested vertical milestone for tenant registration, normalized dormitory property, bed/room reservations, check-in, transfer, occupancy history, and checkout request.
 
-**Architecture:** Flyway V3 migrates the legacy room/occupancy schema into explicit building, floor, bed, allocation, and event tables without deleting existing data. Transactional Spring services own state transitions and overlap protection; React renders four role-aware workspaces over typed `/api/v1` contracts.
+**Architecture:** Flyway V4 migrates the legacy room/occupancy schema into explicit building, floor, bed, allocation, and event tables without deleting existing data. Transactional Spring services own state transitions and write daily allocation guard rows protected by a MySQL unique key; React renders four role-aware workspaces over typed `/api/v1` contracts.
 
 **Tech Stack:** Java 21, Spring Boot 4.1, Spring Security, Spring Data JPA, Flyway, MySQL 8.4, React 19.2, TypeScript 5.9, Vite 7, Tailwind CSS 4, JUnit 5, Testcontainers, Vitest, Testing Library
 
@@ -22,60 +22,58 @@
 
 ---
 
-### Task 1: Flyway V3 normalized milestone schema
+### Task 1: Flyway V4 normalized milestone schema
 
 **Files:**
-- Create: `backend/src/main/resources/db/migration/V3__tenant_property_occupancy.sql`
-- Create: `backend/src/test/java/th/ac/dusit/dorm/platform/MilestoneTwoMigrationContractTest.java`
+- Create: `backend/src/main/resources/db/migration/V4__tenant_property_occupancy.sql`
 - Modify: `backend/src/test/java/th/ac/dusit/dorm/platform/MySqlMigrationIntegrationTest.java`
 - Modify: `docs/data-dictionary.md`
 
 **Interfaces:**
-- Produces tables `tenant_code_sequences`, `tenant_addresses`, `tenant_contacts`, `buildings`, `floors`, `beds`, `room_meters`, `reservations`, `reservation_beds`, `occupancy_beds`, `occupancy_events`.
+- Produces tables `tenant_code_sequences`, `tenant_addresses`, `tenant_contacts`, `buildings`, `floors`, `beds`, `room_meters`, `reservations`, `reservation_beds`, `occupancy_beds`, `occupancy_events`, `bed_allocation_days`.
 - Adds `app_users.tenant_id`, tenant detail/version columns, `rooms.floor_id`, and occupancy version/source/expected-end columns.
-- Produces MySQL overlap triggers `trg_reservation_beds_no_overlap_i/u` and `trg_occupancy_beds_no_overlap_i/u`.
+- Produces a database-level overlap guard with primary key `(bed_id, allocation_date)` and exactly one reservation/occupancy source per row.
 
-- [ ] **Step 1: Write the failing migration contract test**
+- [x] **Step 1: Extend the real MySQL migration test and watch it fail**
 
 ```java
 @Test
-void v3DefinesNormalizedMilestoneAndOverlapGuards() throws Exception {
-    String sql = Files.readString(Path.of("src/main/resources/db/migration/V3__tenant_property_occupancy.sql"));
-    assertThat(sql).contains("CREATE TABLE buildings", "CREATE TABLE floors", "CREATE TABLE beds");
-    assertThat(sql).contains("CREATE TABLE reservations", "CREATE TABLE reservation_beds");
-    assertThat(sql).contains("CREATE TRIGGER trg_reservation_beds_no_overlap_i");
-    assertThat(sql).contains("CREATE TRIGGER trg_occupancy_beds_no_overlap_i");
+void databaseRejectsDuplicateAllocationDayForTheSameBed() throws Exception {
+    migrate();
+    insertAllocationDay(1L, LocalDate.parse("2026-08-15"), 101L);
+    assertThatThrownBy(() -> insertAllocationDay(
+            1L, LocalDate.parse("2026-08-15"), 102L))
+        .hasMessageContaining("Duplicate entry");
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
-Run: `mvn -q -Dtest=MilestoneTwoMigrationContractTest test`
+Run: `mvn -q -Dtest=MySqlMigrationIntegrationTest test`
 
-Expected: FAIL because V3 does not exist.
+Expected: FAIL because the existing migration chain ends at V3 and `buildings`/`beds` do not exist.
 
-- [ ] **Step 3: Add V3 migration**
+- [x] **Step 3: Add V4 migration**
 
-Use explicit foreign keys, checks, unique constraints, indexes, and legacy backfill. Backfill one building per legacy `rooms.building_code`, one floor per `(building,floor)`, one bed per legacy capacity, and link legacy occupancy by `bed_number`. Trigger overlap predicate is inclusive:
+Use explicit foreign keys, checks, unique constraints, indexes, and legacy backfill. Backfill one building per legacy `rooms.building_code`, one floor per `(building,floor)`, one bed per legacy capacity, and link legacy occupancy by `bed_number`. Create one allocation guard row for every inclusive date in an active allocation:
 
 ```sql
-existing.start_date <= NEW.end_date
-AND existing.end_date >= NEW.start_date
+PRIMARY KEY (bed_id, allocation_date)
 ```
 
-Raise `SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'BED_NOT_AVAILABLE'`.
+The guard row references exactly one of `reservation_bed_id` or `occupancy_bed_id`. A duplicate primary key becomes the stable `BED_NOT_AVAILABLE` application error.
 
-- [ ] **Step 4: Extend the MySQL 8.4 migration test**
+- [x] **Step 4: Complete the MySQL 8.4 migration assertions**
 
-Assert V3 migration success, migrated tables, `app_users.tenant_id`, and all four triggers through `information_schema.TRIGGERS`.
+Assert V4 migration success, migrated tables, `app_users.tenant_id`, source check constraint, and duplicate allocation-day rejection on MySQL 8.4.
 
-- [ ] **Step 5: Run GREEN and migration regression**
+- [x] **Step 5: Run GREEN and migration regression**
 
-Run: `mvn -q -Dtest=MilestoneTwoMigrationContractTest,MySqlMigrationIntegrationTest test`
+Run: `mvn -q -Dtest=MySqlMigrationIntegrationTest test`
 
 Run: `mvn -q clean test`
 
-- [ ] **Step 6: Update data dictionary, verify, commit, and push**
+- [x] **Step 6: Update data dictionary, verify, commit, and push**
 
 Run: `git diff --check`
 
