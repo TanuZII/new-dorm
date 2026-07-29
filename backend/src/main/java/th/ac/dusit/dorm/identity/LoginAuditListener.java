@@ -1,6 +1,7 @@
 package th.ac.dusit.dorm.identity;
 
 import java.time.Instant;
+import java.util.Map;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
@@ -33,7 +34,7 @@ public class LoginAuditListener {
                 username,
                 "Bad credentials",
                 remoteAddress(event.getAuthentication().getDetails()),
-                "{}");
+                Map.of());
     }
 
     @EventListener
@@ -49,7 +50,7 @@ public class LoginAuditListener {
                 username,
                 null,
                 remoteAddress(event.getAuthentication().getDetails()),
-                "{}");
+                Map.of());
     }
 
     private String remoteAddress(Object details) {

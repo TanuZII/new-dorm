@@ -1,6 +1,7 @@
 package th.ac.dusit.dorm.identity;
 
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Page;
@@ -42,7 +43,7 @@ public class UserService {
                 request.role());
         var saved = repository.save(user);
         auditService.record(
-                actor, "USER_CREATED", "USER", username, null, ipAddress, "{}");
+                actor, "USER_CREATED", "USER", username, null, ipAddress, Map.of());
         return UserResponse.from(saved);
     }
 
@@ -72,7 +73,7 @@ public class UserService {
                 user.getUsername(),
                 request.reason().trim(),
                 ipAddress,
-                "{}");
+                Map.of());
         return UserResponse.from(user);
     }
 
@@ -91,7 +92,7 @@ public class UserService {
                 user.getUsername(),
                 request.reason().trim(),
                 ipAddress,
-                "{}");
+                Map.of());
     }
 
     @Transactional
@@ -115,7 +116,7 @@ public class UserService {
                 username,
                 null,
                 ipAddress,
-                "{}");
+                Map.of());
     }
 
     private AppUserEntity findRequired(long id) {

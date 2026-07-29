@@ -2,6 +2,7 @@ package th.ac.dusit.dorm.identity;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,7 @@ public class RoleService {
         role.replacePermissions(new LinkedHashSet<>(permissions));
         auditService.record(
                 actor, "ROLE_PERMISSIONS_CHANGED", "ROLE", role.getCode(),
-                request.reason().trim(), ipAddress, "{}");
+                request.reason().trim(), ipAddress, Map.of());
         return RoleResponse.from(role);
     }
 }

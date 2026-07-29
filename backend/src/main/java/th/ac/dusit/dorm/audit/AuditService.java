@@ -1,7 +1,8 @@
 package th.ac.dusit.dorm.audit;
 
+import java.time.Instant;
+import java.util.Map;
 import org.slf4j.MDC;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,10 +12,10 @@ import th.ac.dusit.dorm.platform.TraceIdFilter;
 @Service
 public class AuditService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final AuditLogRepository repository;
 
-    public AuditService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public AuditService(AuditLogRepository repository) {
+        this.repository = repository;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -25,12 +26,8 @@ public class AuditService {
             String entityId,
             String reason,
             String ipAddress,
-            String details) {
-        jdbcTemplate.update("""
-                INSERT INTO audit_logs
-                    (actor, action, entity_type, entity_id, reason, ip_address, trace_id, details)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
+            Map<String, Object> details) {
+        repository.save(new AuditLogEntity(
                 actor,
                 action,
                 entityType,
@@ -38,6 +35,7 @@ public class AuditService {
                 reason,
                 ipAddress,
                 MDC.get(TraceIdFilter.MDC_KEY),
-                details == null ? "{}" : details);
+                details,
+                Instant.now()));
     }
 }

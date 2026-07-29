@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.Map;
 import java.util.Optional;
 
 import th.ac.dusit.dorm.audit.AuditService;
@@ -50,7 +51,7 @@ class UserServiceTest {
         assertThat(result.email()).isEqualTo("finance@example.org");
         assertThat(result.role()).isEqualTo(UserRole.FINANCE);
         verify(auditService).record(
-                "admin", "USER_CREATED", "USER", "finance.one", null, "127.0.0.1", "{}");
+                "admin", "USER_CREATED", "USER", "finance.one", null, "127.0.0.1", Map.of());
     }
 
     @Test
@@ -81,7 +82,7 @@ class UserServiceTest {
         assertThat(result.active()).isFalse();
         verify(auditService).record(
                 "admin", "USER_DEACTIVATED", "USER", "staff.one",
-                "พ้นสภาพเจ้าหน้าที่", "127.0.0.1", "{}");
+                "พ้นสภาพเจ้าหน้าที่", "127.0.0.1", Map.of());
     }
 
     @Test
@@ -99,6 +100,6 @@ class UserServiceTest {
         assertThat(user.getPasswordHash()).isEqualTo("new-hash");
         verify(auditService).record(
                 "admin", "USER_PASSWORD_RESET", "USER", "staff.one",
-                "ผู้ใช้ร้องขอ", "127.0.0.1", "{}");
+                "ผู้ใช้ร้องขอ", "127.0.0.1", Map.of());
     }
 }
