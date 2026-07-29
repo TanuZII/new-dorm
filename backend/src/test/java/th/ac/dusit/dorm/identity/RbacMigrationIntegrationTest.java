@@ -40,7 +40,7 @@ class RbacMigrationIntegrationTest {
                 .load()
                 .migrate();
 
-        assertThat(result.migrationsExecuted).isEqualTo(1);
+        assertThat(result.success).isTrue();
         try (var connection = DriverManager.getConnection(
                 MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword());
                 var statement = connection.createStatement()) {
@@ -61,6 +61,18 @@ class RbacMigrationIntegrationTest {
                     """)) {
                 assertThat(assignment.next()).isTrue();
                 assertThat(assignment.getInt(1)).isEqualTo(1);
+            }
+            try (var masterData = statement.executeQuery("""
+                    SELECT COUNT(*)
+                    FROM master_data_items
+                    WHERE (data_type = 'TENANT_TYPE'
+                           AND item_code IN ('STUDENT', 'STAFF', 'EXTERNAL'))
+                       OR (data_type = 'FEE_TYPE'
+                           AND item_code IN ('RENT', 'WATER', 'ELECTRICITY',
+                                             'DEPOSIT', 'PENALTY', 'OTHER'))
+                    """)) {
+                assertThat(masterData.next()).isTrue();
+                assertThat(masterData.getInt(1)).isEqualTo(9);
             }
         }
     }

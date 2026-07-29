@@ -7,10 +7,12 @@ import java.util.Map;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,6 +30,12 @@ public class GlobalExceptionHandler {
         return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", exception.getMessage(), Map.of());
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiError> typeMismatch(MethodArgumentTypeMismatchException exception) {
+        return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST",
+                "Invalid value for " + exception.getName(), Map.of());
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     ResponseEntity<ApiError> conflict(IllegalStateException exception) {
         return response(HttpStatus.CONFLICT, "INVALID_STATE", exception.getMessage(), Map.of());
@@ -36,6 +44,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<ApiError> notFound(ResourceNotFoundException exception) {
         return response(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage(), Map.of());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    ResponseEntity<ApiError> concurrentModification(ObjectOptimisticLockingFailureException exception) {
+        return response(HttpStatus.CONFLICT, "CONCURRENT_MODIFICATION",
+                "The record was changed by another user", Map.of());
     }
 
     @ExceptionHandler(AuthenticationException.class)

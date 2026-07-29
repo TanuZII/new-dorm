@@ -2,6 +2,7 @@ package th.ac.dusit.dorm.identity;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,6 +39,15 @@ public class SecurityConfig {
                                 "/api/v1/users/**",
                                 "/api/v1/roles/**",
                                 "/api/v1/audit-logs/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.POST, "/api/v1/master-data/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.PUT, "/api/v1/master-data/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.PATCH, "/api/v1/master-data/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/api/v1/dashboard/**").hasAnyRole(
                                 "ADMIN", "DORM_STAFF", "FINANCE", "APPROVER", "MAINTENANCE")
