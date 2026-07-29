@@ -36,6 +36,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid #76b7d6; outline-
 .nav-link { border: 0; width: 100%; color: #9fb4c3; background: transparent; display: flex; align-items: center; gap: 13px; padding: 10px 12px; border-radius: 8px; text-align: left; position: relative; }
 .nav-link:hover { color: white; background: #183b55; }
 .nav-link--active { color: white; background: #1c4764; }
+.nav-link--disabled { cursor: default; opacity: .62; }
+.nav-link--disabled:hover { color: #9fb4c3; background: transparent; }
+.nav-link__chevron { margin-left: auto; opacity: .45; }
+.nav-section { margin: 18px 12px 5px; color: #66869d; font: 600 9px 'Chakra Petch', sans-serif; letter-spacing: .14em; text-transform: uppercase; }
 .nav-link__signal { position: absolute; right: 0; width: 3px; height: 20px; background: #86cdb1; border-radius: 4px 0 0 4px; }
 .sidebar__footer { margin-top: auto; border-top: 1px solid #26445b; padding-top: 12px; }
 .operator { margin-top: 12px; padding: 12px 8px 0; display: flex; align-items: center; gap: 10px; }

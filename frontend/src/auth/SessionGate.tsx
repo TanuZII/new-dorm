@@ -1,5 +1,6 @@
 import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
 import { Building2, KeyRound, UserRound } from 'lucide-react'
+import { SessionProvider, type SessionProfile } from './SessionContext'
 
 type SessionState = 'checking' | 'anonymous' | 'authenticated'
 
@@ -7,10 +8,18 @@ export function SessionGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SessionState>('checking')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [profile, setProfile] = useState<SessionProfile | null>(null)
 
   useEffect(() => {
     fetch('/api/v1/auth/me', { credentials: 'include' })
-      .then((response) => setState(response.ok ? 'authenticated' : 'anonymous'))
+      .then(async (response) => {
+        if (!response.ok) {
+          setState('anonymous')
+          return
+        }
+        setProfile(await response.json() as SessionProfile)
+        setState('authenticated')
+      })
       .catch(() => setState('anonymous'))
   }, [])
 
@@ -30,7 +39,7 @@ export function SessionGate({ children }: { children: ReactNode }) {
         body: JSON.stringify({ username: form.get('username'), password: form.get('password') }),
       })
       if (!response.ok) throw new Error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')
-      await response.json()
+      setProfile(await response.json() as SessionProfile)
       setState('authenticated')
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : 'เข้าสู่ระบบไม่สำเร็จ')
@@ -42,7 +51,9 @@ export function SessionGate({ children }: { children: ReactNode }) {
   if (state === 'checking') {
     return <div className="session-loading"><Building2 size={30} /><span>กำลังตรวจสอบสิทธิ์…</span></div>
   }
-  if (state === 'authenticated') return children
+  if (state === 'authenticated' && profile) {
+    return <SessionProvider profile={profile}>{children}</SessionProvider>
+  }
 
   return (
     <main className="login-shell">
@@ -64,4 +75,3 @@ export function SessionGate({ children }: { children: ReactNode }) {
     </main>
   )
 }
-
