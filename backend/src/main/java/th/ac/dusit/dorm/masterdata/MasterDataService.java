@@ -1,6 +1,8 @@
 package th.ac.dusit.dorm.masterdata;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.springframework.data.domain.Page;
@@ -57,6 +59,42 @@ public class MasterDataService {
                 ipAddress,
                 Map.of("type", type.name(), "code", code));
         return MasterDataResponse.from(saved);
+    }
+
+    @Transactional
+    public int importAll(
+            List<MasterDataImportItem> items,
+            String actor,
+            String ipAddress) {
+        var effectiveKeys = new HashSet<String>();
+        for (var item : items) {
+            String code = normalizeCode(item.code());
+            validateDates(item.effectiveFrom(), item.effectiveTo());
+            validateParent(item.type(), item.parentId());
+            validateNoOverlap(item.type(), code, null, item.effectiveFrom(), item.effectiveTo());
+            String key = item.type() + "|" + code + "|" + item.effectiveFrom();
+            if (!effectiveKeys.add(key)) {
+                throw new IllegalStateException("Duplicate master data row " + key);
+            }
+        }
+        var entities = items.stream().map(item -> new MasterDataEntity(
+                item.type(),
+                normalizeCode(item.code()),
+                item.nameTh().trim(),
+                normalizeNullable(item.nameEn()),
+                item.parentId(),
+                item.effectiveFrom(),
+                item.effectiveTo())).toList();
+        repository.saveAll(entities);
+        auditService.record(
+                actor,
+                "MASTER_DATA_IMPORTED",
+                "MASTER_DATA_IMPORT",
+                null,
+                null,
+                ipAddress,
+                Map.of("rowCount", entities.size()));
+        return entities.size();
     }
 
     public Page<MasterDataResponse> findAll(

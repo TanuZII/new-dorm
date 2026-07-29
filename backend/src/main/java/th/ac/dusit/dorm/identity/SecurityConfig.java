@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/users/**",
                                 "/api/v1/roles/**",
-                                "/api/v1/audit-logs/**")
+                                "/api/v1/audit-logs/**",
+                                "/api/v1/imports/**")
                         .hasRole("ADMIN")
                         .requestMatchers(
                                 HttpMethod.POST, "/api/v1/master-data/**")

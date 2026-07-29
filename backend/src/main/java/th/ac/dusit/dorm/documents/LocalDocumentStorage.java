@@ -56,6 +56,22 @@ public class LocalDocumentStorage implements DocumentStorage {
         }
     }
 
+    @Override
+    public byte[] read(String path) {
+        if (path == null || path.isBlank()) {
+            throw new IllegalArgumentException("Document path is required");
+        }
+        Path target = root.resolve(path).normalize();
+        if (!target.startsWith(root)) {
+            throw new IllegalArgumentException("Invalid document path");
+        }
+        try {
+            return Files.readAllBytes(target);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Unable to read document", exception);
+        }
+    }
+
     private String extensionOf(String originalName) {
         if (originalName == null) return "";
         int dot = originalName.lastIndexOf('.');
