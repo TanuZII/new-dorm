@@ -2,10 +2,10 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoleRoute } from './auth/RoleRoute'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { AppShell } from './layout/AppShell'
+import { UsersPage } from './features/users/UsersPage'
+import { RolesPage } from './features/roles/RolesPage'
 
 const adminPages = [
-  { path: 'users', title: 'จัดการผู้ใช้ระบบ', detail: 'ค้นหา เพิ่ม และควบคุมสถานะบัญชีผู้ใช้งาน' },
-  { path: 'roles', title: 'สิทธิ์การใช้งาน', detail: 'กำหนดสิทธิ์ของแต่ละบทบาทในระบบ' },
   { path: 'audit', title: 'ประวัติการใช้งาน', detail: 'ตรวจสอบเหตุการณ์สำคัญและการเปลี่ยนแปลงข้อมูล' },
   { path: 'master-data', title: 'ข้อมูลตั้งต้น', detail: 'จัดการรหัสและช่วงเวลาที่มีผลของข้อมูลกลาง' },
   { path: 'imports', title: 'นำเข้าข้อมูล', detail: 'ตรวจสอบไฟล์ Excel ก่อนยืนยันบันทึกข้อมูล' },
@@ -17,6 +17,8 @@ export default function App() {
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
         <Route element={<RoleRoute roles={['ADMIN']} />}>
+          <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/roles" element={<RolesPage />} />
           {adminPages.map((page) => <Route key={page.path} path={`/admin/${page.path}`} element={<AdminPlaceholder {...page} />} />)}
         </Route>
       </Route>
