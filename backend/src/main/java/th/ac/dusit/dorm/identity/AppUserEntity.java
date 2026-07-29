@@ -14,6 +14,8 @@ import java.util.Set;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
+import th.ac.dusit.dorm.tenant.persistence.TenantEntity;
 
 @Entity
 @Table(name = "app_users")
@@ -46,6 +48,10 @@ public class AppUserEntity {
 
     @Column(name = "locked_until")
     private Instant lockedUntil;
+
+    @OneToOne
+    @JoinColumn(name = "tenant_id")
+    private TenantEntity tenant;
 
     @ManyToMany
     @JoinTable(
@@ -83,6 +89,11 @@ public class AppUserEntity {
     public boolean isActive() { return active; }
     public int getFailedAttempts() { return failedAttempts; }
     public Instant getLockedUntil() { return lockedUntil; }
+    public TenantEntity getTenant() { return tenant; }
+
+    public void linkTenant(TenantEntity tenant) {
+        this.tenant = tenant;
+    }
 
     public void recordFailure(int maximumFailures, int lockMinutes, Instant now) {
         failedAttempts++;

@@ -6,7 +6,14 @@ public record UserResponse(
         String displayName,
         String email,
         UserRole role,
+        Long tenantId,
         boolean active) {
+
+    public UserResponse(
+            Long id, String username, String displayName, String email,
+            UserRole role, boolean active) {
+        this(id, username, displayName, email, role, null, active);
+    }
 
     static UserResponse from(AppUserEntity user) {
         return new UserResponse(
@@ -15,6 +22,7 @@ public record UserResponse(
                 user.getDisplayName(),
                 user.getEmail(),
                 user.getRole(),
+                user.getTenant() == null ? null : user.getTenant().getId(),
                 user.isActive());
     }
 }

@@ -8,9 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import th.ac.dusit.dorm.audit.AuditService;
 import th.ac.dusit.dorm.common.ResourceNotFoundException;
+import th.ac.dusit.dorm.common.DomainConflictException;
+import th.ac.dusit.dorm.tenant.persistence.TenantRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -19,14 +22,25 @@ public class UserService {
     private final AppUserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+    private final TenantRepository tenantRepository;
 
+    @Autowired
     public UserService(
             AppUserRepository repository,
             PasswordEncoder passwordEncoder,
-            AuditService auditService) {
+            AuditService auditService,
+            TenantRepository tenantRepository) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.auditService = auditService;
+        this.tenantRepository = tenantRepository;
+    }
+
+    UserService(
+            AppUserRepository repository,
+            PasswordEncoder passwordEncoder,
+            AuditService auditService) {
+        this(repository, passwordEncoder, auditService, null);
     }
 
     @Transactional
@@ -41,6 +55,7 @@ public class UserService {
                 request.displayName().trim(),
                 normalize(request.email()),
                 request.role());
+        linkTenant(user, request);
         var saved = repository.save(user);
         auditService.record(
                 actor, "USER_CREATED", "USER", username, null, ipAddress, Map.of());
@@ -122,6 +137,24 @@ public class UserService {
     private AppUserEntity findRequired(long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User " + id + " not found"));
+    }
+
+    private void linkTenant(AppUserEntity user, CreateUserRequest request) {
+        if (request.tenantId() == null) return;
+        if (request.role() != UserRole.TENANT) {
+            throw new IllegalArgumentException("Only TENANT users may link a tenant profile");
+        }
+        if (repository.existsByTenant_Id(request.tenantId())) {
+            throw new DomainConflictException(
+                    "TENANT_ACCOUNT_ALREADY_LINKED", "Tenant profile already has a user account");
+        }
+        var tenant = tenantRepository.findById(request.tenantId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Tenant " + request.tenantId() + " not found"));
+        if (!tenant.isActive()) {
+            throw new IllegalArgumentException("Tenant profile is inactive");
+        }
+        user.linkTenant(tenant);
     }
 
     private String normalize(String value) {

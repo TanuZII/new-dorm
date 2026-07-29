@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
-public record CreateTenantRequest(
+public record UpdateTenantRequest(
         @NotNull TenantType tenantType,
         @Size(max = 40) String institutionalId,
         @Size(max = 20) String citizenId,
@@ -16,9 +16,10 @@ public record CreateTenantRequest(
         @Email @Size(max = 160) String email,
         @Size(max = 30) String phone,
         List<@Valid TenantAddressRequest> addresses,
-        List<@Valid TenantContactRequest> contacts) {
+        List<@Valid TenantContactRequest> contacts,
+        @NotNull Long version) {
 
-    public CreateTenantRequest {
+    public UpdateTenantRequest {
         addresses = addresses == null ? List.of() : List.copyOf(addresses);
         contacts = contacts == null ? List.of() : List.copyOf(contacts);
     }

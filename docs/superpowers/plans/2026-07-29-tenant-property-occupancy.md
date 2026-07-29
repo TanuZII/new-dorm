@@ -113,7 +113,7 @@ Push: `git push origin main`
 - Produces `GET/POST /api/v1/tenants`, `GET/PUT /api/v1/tenants/{id}`, `PATCH /api/v1/tenants/{id}/status`.
 - Existing `POST /api/v1/users` accepts optional `tenantId`; only role `TENANT` may be linked, and one profile/user pair is unique.
 
-- [ ] **Step 1: Replace legacy tenant tests with failing desired behavior**
+- [x] **Step 1: Replace legacy tenant tests with failing desired behavior**
 
 Tests prove generated tenant code, required institutional ID for student/personnel, duplicate identifier mapping to `TENANT_IDENTIFIER_DUPLICATE`, nested address/contact persistence, update version, linked tenant account uniqueness, and deactivate reason audit.
 
@@ -124,13 +124,13 @@ assertThatThrownBy(() -> service.create(duplicateInstitutionalId))
     .extracting("code").isEqualTo("TENANT_IDENTIFIER_DUPLICATE");
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `mvn -q -Dtest=TenantServiceTest,TenantControllerTest test`
 
 Expected: compilation/test failures for missing DTOs, generated code, filters, and endpoints.
 
-- [ ] **Step 3: Implement the tenant aggregate minimally**
+- [x] **Step 3: Implement the tenant aggregate minimally**
 
 Use `@Version`, orphan-managed address/contact children, normalized identifiers, and a database-backed sequence insert. `DomainConflictException` carries an exact code and message; map it to HTTP 409 in `GlobalExceptionHandler`.
 
@@ -147,17 +147,17 @@ public String nextCode() {
 }
 ```
 
-- [ ] **Step 4: Implement role-secured controller contracts**
+- [x] **Step 4: Implement role-secured controller contracts**
 
 `ADMIN`/`DORM_STAFF` mutate, `ADMIN`/`DORM_STAFF`/`FINANCE` read. Every request body uses `@Valid`. Do not add DELETE.
 
-- [ ] **Step 5: Run GREEN and full backend regression**
+- [x] **Step 5: Run GREEN and full backend regression**
 
 Run: `mvn -q -Dtest=TenantServiceTest,TenantControllerTest test`
 
 Run: `mvn -q clean test`
 
-- [ ] **Step 6: Verify, commit, and push**
+- [x] **Step 6: Verify, commit, and push**
 
 Run: `git diff --check`
 

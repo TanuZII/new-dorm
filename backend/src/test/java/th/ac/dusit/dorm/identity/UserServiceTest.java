@@ -16,6 +16,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import th.ac.dusit.dorm.audit.AuditService;
+import th.ac.dusit.dorm.common.DomainConflictException;
+import th.ac.dusit.dorm.tenant.TenantType;
+import th.ac.dusit.dorm.tenant.persistence.TenantEntity;
+import th.ac.dusit.dorm.tenant.persistence.TenantRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -28,6 +32,9 @@ class UserServiceTest {
 
     @Mock
     private AuditService auditService;
+
+    @Mock
+    private TenantRepository tenantRepository;
 
     @Test
     void createsAUserWithNormalizedUsernameHashedPasswordAndAudit() {
@@ -101,5 +108,36 @@ class UserServiceTest {
         verify(auditService).record(
                 "admin", "USER_PASSWORD_RESET", "USER", "staff.one",
                 "ผู้ใช้ร้องขอ", "127.0.0.1", Map.of());
+    }
+
+    @Test
+    void linksOnlyOneTenantAccountToAnActiveTenantProfile() {
+        var tenant = new TenantEntity(
+                "TEN-000001", TenantType.STUDENT, "68001", null,
+                "Somchai", "Jaidee", null, null);
+        when(repository.existsByUsernameIgnoreCase("tenant.one")).thenReturn(false);
+        when(repository.existsByTenant_Id(7L)).thenReturn(false);
+        when(tenantRepository.findById(7L)).thenReturn(Optional.of(tenant));
+        when(passwordEncoder.encode("Strong@1234")).thenReturn("hash");
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        var service = new UserService(repository, passwordEncoder, auditService, tenantRepository);
+
+        var created = service.create(new CreateUserRequest(
+                "tenant.one", "Strong@1234", "Tenant One", null, UserRole.TENANT, 7L),
+                "admin", "127.0.0.1");
+
+        assertThat(created.tenantId()).isNull();
+        var captor = ArgumentCaptor.forClass(AppUserEntity.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getTenant()).isSameAs(tenant);
+
+        when(repository.existsByUsernameIgnoreCase("tenant.two")).thenReturn(false);
+        when(repository.existsByTenant_Id(7L)).thenReturn(true);
+        assertThatThrownBy(() -> service.create(new CreateUserRequest(
+                "tenant.two", "Strong@1234", "Tenant Two", null, UserRole.TENANT, 7L),
+                "admin", "127.0.0.1"))
+                .isInstanceOf(DomainConflictException.class)
+                .extracting("code")
+                .isEqualTo("TENANT_ACCOUNT_ALREADY_LINKED");
     }
 }

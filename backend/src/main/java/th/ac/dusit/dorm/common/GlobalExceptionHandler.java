@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,6 +42,11 @@ public class GlobalExceptionHandler {
         return response(HttpStatus.CONFLICT, "INVALID_STATE", exception.getMessage(), Map.of());
     }
 
+    @ExceptionHandler(DomainConflictException.class)
+    ResponseEntity<ApiError> domainConflict(DomainConflictException exception) {
+        return response(HttpStatus.CONFLICT, exception.code(), exception.getMessage(), Map.of());
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<ApiError> notFound(ResourceNotFoundException exception) {
         return response(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage(), Map.of());
@@ -56,6 +62,12 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> authenticationFailure(AuthenticationException exception) {
         return response(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_FAILED",
                 "Invalid username or password", Map.of());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ApiError> accessDenied(AccessDeniedException exception) {
+        return response(HttpStatus.FORBIDDEN, "ACCESS_DENIED",
+                "You do not have permission to perform this action", Map.of());
     }
 
     @ExceptionHandler(Exception.class)

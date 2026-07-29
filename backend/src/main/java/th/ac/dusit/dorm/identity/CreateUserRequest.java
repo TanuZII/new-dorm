@@ -14,5 +14,11 @@ public record CreateUserRequest(
         @NotBlank @Size(min = 8, max = 72) String password,
         @NotBlank @Size(max = 160) String displayName,
         @Email @Size(max = 160) String email,
-        @NotNull UserRole role) {
+        @NotNull UserRole role,
+        Long tenantId) {
+
+    public CreateUserRequest(
+            String username, String password, String displayName, String email, UserRole role) {
+        this(username, password, displayName, email, role, null);
+    }
 }

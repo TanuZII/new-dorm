@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
     Optional<AppUserEntity> findByUsernameIgnoreCase(String username);
     boolean existsByUsernameIgnoreCase(String username);
+    boolean existsByTenant_Id(Long tenantId);
     Page<AppUserEntity> findByUsernameContainingIgnoreCaseOrDisplayNameContainingIgnoreCase(
             String username, String displayName, Pageable pageable);
 
