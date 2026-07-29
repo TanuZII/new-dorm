@@ -46,14 +46,27 @@ public class AppUserEntity {
     }
 
     public AppUserEntity(String username, String passwordHash, String displayName, UserRole role) {
+        this(username, passwordHash, displayName, null, role);
+    }
+
+    public AppUserEntity(
+            String username,
+            String passwordHash,
+            String displayName,
+            String email,
+            UserRole role) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.displayName = displayName;
+        this.email = email;
         this.role = role;
     }
 
+    public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getPasswordHash() { return passwordHash; }
+    public String getDisplayName() { return displayName; }
+    public String getEmail() { return email; }
     public UserRole getRole() { return role; }
     public boolean isActive() { return active; }
     public int getFailedAttempts() { return failedAttempts; }
@@ -70,5 +83,16 @@ public class AppUserEntity {
         failedAttempts = 0;
         lockedUntil = null;
     }
-}
 
+    public void changeStatus(boolean active) {
+        this.active = active;
+        if (active) {
+            recordSuccess();
+        }
+    }
+
+    public void resetPassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+        recordSuccess();
+    }
+}
