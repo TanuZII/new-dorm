@@ -6,10 +6,7 @@ import { UsersPage } from './features/users/UsersPage'
 import { RolesPage } from './features/roles/RolesPage'
 import { AuditPage } from './features/audit/AuditPage'
 import { MasterDataPage } from './features/master-data/MasterDataPage'
-
-const adminPages = [
-  { path: 'imports', title: 'นำเข้าข้อมูล', detail: 'ตรวจสอบไฟล์ Excel ก่อนยืนยันบันทึกข้อมูล' },
-]
+import { ImportWizard } from './features/imports/ImportWizard'
 
 export default function App() {
   return (
@@ -21,14 +18,10 @@ export default function App() {
           <Route path="/admin/roles" element={<RolesPage />} />
           <Route path="/admin/audit" element={<AuditPage />} />
           <Route path="/admin/master-data" element={<MasterDataPage />} />
-          {adminPages.map((page) => <Route key={page.path} path={`/admin/${page.path}`} element={<AdminPlaceholder {...page} />} />)}
+          <Route path="/admin/imports" element={<ImportWizard />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
-}
-
-function AdminPlaceholder({ title, detail }: { title: string; detail: string }) {
-  return <div className="content"><section className="page-intro"><div><p className="eyebrow">ADMINISTRATION</p><h1>{title}</h1><p>{detail}</p></div></section><section className="panel empty-state"><strong>กำลังเตรียมพื้นที่ทำงาน</strong><p>หน้าจอนี้จะเชื่อมต่อข้อมูลจริงในขั้นถัดไป</p></section></div>
 }
