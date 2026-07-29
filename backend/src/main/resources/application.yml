@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: dorm-api
+  datasource:
+    url: ${DORM_DB_URL:jdbc:mysql://127.0.0.1:3306/dbdorm?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DORM_DB_USERNAME:root}
+    password: ${DORM_DB_PASSWORD:password123}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  session:
+    jdbc:
+      initialize-schema: always
+    timeout: 30m
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: ${DORM_COOKIE_SECURE:false}
+        same-site: lax
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+dorm:
+  storage-path: ${DORM_STORAGE_PATH:./storage}
+  audit-retention-days: ${DORM_AUDIT_RETENTION_DAYS:365}
+
