@@ -4,10 +4,10 @@ import { DashboardPage } from './features/dashboard/DashboardPage'
 import { AppShell } from './layout/AppShell'
 import { UsersPage } from './features/users/UsersPage'
 import { RolesPage } from './features/roles/RolesPage'
+import { AuditPage } from './features/audit/AuditPage'
+import { MasterDataPage } from './features/master-data/MasterDataPage'
 
 const adminPages = [
-  { path: 'audit', title: 'ประวัติการใช้งาน', detail: 'ตรวจสอบเหตุการณ์สำคัญและการเปลี่ยนแปลงข้อมูล' },
-  { path: 'master-data', title: 'ข้อมูลตั้งต้น', detail: 'จัดการรหัสและช่วงเวลาที่มีผลของข้อมูลกลาง' },
   { path: 'imports', title: 'นำเข้าข้อมูล', detail: 'ตรวจสอบไฟล์ Excel ก่อนยืนยันบันทึกข้อมูล' },
 ]
 
@@ -19,6 +19,8 @@ export default function App() {
         <Route element={<RoleRoute roles={['ADMIN']} />}>
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/roles" element={<RolesPage />} />
+          <Route path="/admin/audit" element={<AuditPage />} />
+          <Route path="/admin/master-data" element={<MasterDataPage />} />
           {adminPages.map((page) => <Route key={page.path} path={`/admin/${page.path}`} element={<AdminPlaceholder {...page} />} />)}
         </Route>
       </Route>
