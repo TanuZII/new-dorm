@@ -47,4 +47,12 @@ describe('users page', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Database unavailable')
     expect(screen.getByRole('button', { name: 'ลองอีกครั้ง' })).toBeInTheDocument()
   })
+
+  it('uses the responsive search layout contract', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => page }))
+    render(<UsersPage />)
+
+    await screen.findByText('FINANCE')
+    expect(screen.getByRole('region', { name: 'ตัวกรองผู้ใช้' }).querySelector('form')).toHaveClass('operations-rail__search')
+  })
 })

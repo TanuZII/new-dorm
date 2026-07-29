@@ -2,10 +2,11 @@
 
 | TOR | ความสามารถ | จุดรองรับ |
 |---|---|---|
-| 3.2.3 | Responsive Web Application | React layout และ mobile breakpoints |
-| 3.2.4–3.2.6 | Login, lock และสิทธิ์ | `identity`, Spring Security, session/CSRF |
+| 3.2.3 | Responsive Web Application | React layout, mobile breakpoints และผลตรวจ desktop/mobile ใน `docs/uat/milestone-1.md` |
+| 3.2.4–3.2.6 | Login, lock และสิทธิ์ | `identity`, Spring Security, session/CSRF, route/menu guard และหน้าจอ `/admin/users`, `/admin/roles` |
 | 3.7 | Integrity และ security | database constraints, validation, RBAC |
-| 3.10, 3.22 | Log ย้อนหลัง | `audit_logs`, retention config 365 วัน |
+| 3.10, 3.22 | Log ย้อนหลัง | `audit_logs`, retention config 365 วัน และหน้าค้นหา `/admin/audit` |
+| 3.12 | ข้อมูลตั้งต้นและนำเข้าข้อมูล | effective-dated master data, `/admin/master-data`, atomic XLSX preview/confirm และ error workbook |
 | 3.11 | งานการเงิน | invoice/payment/receipt schema และ billing domain |
 | 3.13 | ข้อมูลผู้เช่า | tenant API และ `tenants` |
 | 3.14 | ห้อง/เตียง/ห้องชำรุด | room API, optimistic lock และ constraints |

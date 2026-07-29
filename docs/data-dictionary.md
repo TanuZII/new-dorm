@@ -3,7 +3,10 @@
 | กลุ่ม | ตาราง | หน้าที่ |
 |---|---|---|
 | Identity | `app_users` | บัญชี รหัสผ่านแบบ hash บทบาท และสถานะการล็อก |
+| Identity | `roles`, `permissions`, `role_permissions`, `user_roles` | บทบาท 6 กลุ่ม สิทธิ์ราย resource และความสัมพันธ์บัญชี-บทบาท |
 | Audit | `audit_logs` | ผู้ดำเนินการ การกระทำ เหตุผล IP trace ID และวันเวลา |
+| Master Data | `master_data_items` | รหัส/ชื่อ ประเภท parent ช่วงวันที่ใช้งาน สถานะ และ optimistic-lock version |
+| Import | `import_sessions`, `import_errors` | preview token, SHA-256, วันหมดอายุ สรุปจำนวนแถว และข้อผิดพลาดรายแถวก่อน atomic confirm |
 | Tenant | `tenants` | นักศึกษา บุคลากร ศิษย์เก่า และบุคคลภายนอก |
 | Property | `rooms` | อาคาร ห้อง ชั้น ความจุ จำนวนผู้พัก และสถานะ |
 | Occupancy | `occupancies` | การครอบครองเตียงและช่วงวันที่เข้าพัก |
@@ -19,4 +22,3 @@
 
 จำนวนเงินใช้ `DECIMAL(12,2)` เสมอ วันใช้ `DATE` และเหตุการณ์ใช้ `TIMESTAMP`.
 ข้อมูลธุรกรรมที่ออกเอกสารแล้วต้องเปลี่ยนสถานะหรือ void พร้อมเหตุผล ห้ามลบจริง
-

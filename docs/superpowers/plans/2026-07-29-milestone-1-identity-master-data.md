@@ -147,13 +147,13 @@
 - Consumes: auth profile, users, roles, audit logs, master data and import endpoints from Tasks 1–5
 - Produces: routes `/admin/users`, `/admin/roles`, `/admin/audit`, `/admin/master-data`, `/admin/imports`
 
-- [ ] Write failing component tests proving unauthorized menus/routes are absent, not merely disabled.
-- [ ] Write failing tests for user status/reset forms requiring reason and import preview blocking confirm when errors exist.
-- [ ] Implement route metadata with allowed roles and render navigation from the same metadata.
-- [ ] Implement accessible loading, empty, error, pagination and confirmation states with no dead-end controls.
-- [ ] Run `npm test` and `npm run build`.
-- [ ] Run backend tests because the executable JAR embeds `frontend/dist`.
-- [ ] Commit and push with message `feat: add role aware administration workspace`.
+- [x] Write failing component tests proving unauthorized menus/routes are absent, not merely disabled.
+- [x] Write failing tests for user status/reset forms requiring reason and import preview blocking confirm when errors exist.
+- [x] Implement route metadata with allowed roles and render navigation from the same metadata.
+- [x] Implement accessible loading, empty, error, pagination and confirmation states with no dead-end controls.
+- [x] Run `npm test` and `npm run build`.
+- [x] Run backend tests because the executable JAR embeds `frontend/dist`.
+- [x] Commit and push with message `feat: add role aware administration workspace`.
 
 ### Task 7: Milestone 1 acceptance and documentation
 
