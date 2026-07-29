@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: ${DORM_DB_URL:jdbc:mysql://127.0.0.1:3306/dbdorm?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DORM_DB_USERNAME:root}
+
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false

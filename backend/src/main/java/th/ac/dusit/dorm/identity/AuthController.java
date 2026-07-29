@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,8 +38,9 @@ public class AuthController {
             @Valid @RequestBody LoginRequest login,
             HttpServletRequest request,
             HttpServletResponse response) {
-        Authentication authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(login.username(), login.password()));
+        var token = UsernamePasswordAuthenticationToken.unauthenticated(login.username(), login.password());
+        token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        Authentication authentication = authenticationManager.authenticate(token);
         var context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
@@ -68,4 +70,3 @@ public class AuthController {
         return new LoginResponse(authentication.getName(), roles);
     }
 }
-

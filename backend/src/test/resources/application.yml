@@ -10,3 +10,8 @@ spring:
     enabled: false
   session:
     store-type: none
+
+dorm:
+  storage-path: ./target/test-storage
+  audit-retention-days: 365
+  max-page-size: 200

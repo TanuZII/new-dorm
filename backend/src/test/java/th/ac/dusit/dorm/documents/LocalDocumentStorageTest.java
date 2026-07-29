@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import th.ac.dusit.dorm.platform.DormProperties;
+
 class LocalDocumentStorageTest {
 
     @TempDir
@@ -17,6 +19,8 @@ class LocalDocumentStorageTest {
     @Test
     void canBeCreatedAsASpringBean() {
         try (var context = new AnnotationConfigApplicationContext()) {
+            context.registerBean(DormProperties.class,
+                    () -> new DormProperties(directory, 365, 200));
             context.register(LocalDocumentStorage.class);
             context.refresh();
 

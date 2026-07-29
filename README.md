@@ -39,6 +39,7 @@ $env:DORM_DB_USERNAME='dorm_app'
 $env:DORM_DB_PASSWORD='your-database-password'
 $env:DORM_BOOTSTRAP_PASSWORD='your-first-admin-password'
 $env:DORM_STORAGE_PATH='D:\dorm-storage'
+$env:SPRING_PROFILES_ACTIVE='local'
 ```
 
 `DORM_BOOTSTRAP_PASSWORD` ใช้เฉพาะสร้างบัญชี `admin` ครั้งแรก ระบบจะไม่บันทึก
@@ -64,6 +65,11 @@ mvn spring-boot:run
 ```
 
 Vite proxy จะส่ง `/api` และ `/actuator` ไปยัง `http://localhost:8080`
+Swagger UI อยู่ที่ `http://localhost:8080/swagger-ui.html` และ OpenAPI JSON อยู่ที่
+`http://localhost:8080/v3/api-docs`
+
+ชุดทดสอบ backend ใช้ H2 สำหรับ feedback ที่รวดเร็ว และใช้ Testcontainers ตรวจ Flyway
+migration กับ MySQL 8.4 จริง หากเครื่องไม่มี Docker ชุดทดสอบ container จะถูกข้ามอัตโนมัติ
 
 ## สร้างไฟล์สำหรับติดตั้ง
 
@@ -78,6 +84,10 @@ mvn clean test package
 java -jar target\dorm-api-0.1.0-SNAPSHOT.jar
 ```
 
+ก่อนรัน JAR ให้เลือก profile `staging` หรือ `production` และกำหนด
+`DORM_DB_URL`, `DORM_DB_USERNAME`, `DORM_DB_PASSWORD` และ `DORM_STORAGE_PATH`
+ผ่าน environment variables โดย profile ทั้งสองบังคับ secure session cookie สำหรับ HTTPS
+
 Maven จะรวม `frontend/dist` เข้าใน executable JAR โดยอัตโนมัติ เปิดระบบที่
 `http://localhost:8080` และตรวจ health check ที่ `http://localhost:8080/actuator/health`
 
@@ -89,4 +99,3 @@ Maven จะรวม `frontend/dist` เข้าใน executable JAR โด�
 - Production ต้องตั้ง `DORM_COOKIE_SECURE=true` และให้บริการผ่าน HTTPS
 - เอกสารเก็บนอก source tree พร้อม hash สำหรับตรวจการแก้ไข
 - Audit retention เริ่มต้น 365 วัน
-

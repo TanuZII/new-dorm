@@ -9,8 +9,9 @@ import java.util.HexFormat;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import th.ac.dusit.dorm.platform.DormProperties;
 
 @Component
 public class LocalDocumentStorage implements DocumentStorage {
@@ -19,8 +20,8 @@ public class LocalDocumentStorage implements DocumentStorage {
     private final Path root;
 
     @Autowired
-    public LocalDocumentStorage(@Value("${dorm.storage-path:./storage}") String root) {
-        this(Path.of(root));
+    public LocalDocumentStorage(DormProperties properties) {
+        this(properties.storagePath());
     }
 
     LocalDocumentStorage(Path root) {
